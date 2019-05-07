@@ -22,8 +22,10 @@
 			preloader.classList.remove('active');
 		}
 	}
+
 	// Device List
-	let deviceList = ['Vivago', 'Apple'];
+
+	let deviceList;
 
 	// Document Event listener
 	document.addEventListener('click', event => {
@@ -59,8 +61,6 @@
 
 	// Delete Device func
 	function deleteDevice(event) {
-		console.log('Delete Device called');
-
 		const deviceID = event.target.parentNode.parentNode.dataset.deviceid;
 		axios
 			.get(baseURL + 'DelDevice', {
@@ -71,6 +71,10 @@
 			})
 			.then(function(response) {
 				// console.log(response);
+				// let option = document.createElement('option');
+				// option.innerHTML = event.target.parentNode.parentNode.innerText;
+				// document.querySelector('.custom-select').appendChild(option);
+				// deviceList.push(event.target.parentNode.parentNode.innerText);
 				renderDeviceList();
 			})
 			.catch(function(error) {
@@ -190,8 +194,10 @@
 					}
 				})
 				.then(function(response) {
-					const index = deviceList.indexOf(deviceType);
-					deviceList.splice(index, 1);
+					// const index = deviceList.indexOf(deviceType);
+					// console.log('Index of : ', index);
+
+					// deviceList.splice(index, 1);
 
 					document.querySelector(
 						'.header-area'
@@ -378,13 +384,7 @@
 			<div class="device-list">${renderDeviceList()}</div>
 		</div><br>
 		<div class="select-devices">
-			<h3 class="header-border-bottom">Thuismeter toevoegen:</h3>
-            <select class="custom-select selected-device custom-select-md">
-				${deviceList.map(el => `<option>${el} </option>`).join('')}
-			</select>
-			<button type="button" class="btn select-device-btn">
-				<i class="fa fa-plus select-device-btn-icon"></i>
-			</button>
+			
 		</div>
 	`;
 	}
@@ -416,6 +416,30 @@
 				});
 				renderHTML += '</ul>';
 
+				let tempDeviceList = ['Apple', 'Vivago'];
+				function compare(arr1, arr2) {
+					if (arr2.length <= 0) {
+						return arr1;
+					}
+
+					for (let i = 0; i < arr1.length; i++) {
+						for (let j = 0; j < arr2.length; j++) {
+							if (arr1[i] === arr2[j].deviceType) {
+								let index = tempDeviceList.indexOf(arr1[i]);
+
+								tempDeviceList.splice(index, 1);
+								--i;
+							}
+						}
+					}
+
+					return tempDeviceList;
+				}
+
+				deviceList = compare(tempDeviceList, response.data);
+				document.querySelector(
+					'.select-devices'
+				).innerHTML = renderSelectDevice();
 				$('.device-list').html(renderHTML);
 
 				setPreloaderState(false);
@@ -423,6 +447,17 @@
 			.catch(function(error) {
 				alert(error);
 			});
+	}
+
+	function renderSelectDevice() {
+		return `
+        <h3 class="header-border-bottom">Thuismeter toevoegen:</h3>
+            <select class="custom-select selected-device custom-select-md">
+				${deviceList.map(el => `<option>${el} </option>`).join('')}
+			</select>
+			<button type="button" class="btn select-device-btn">
+				<i class="fa fa-plus select-device-btn-icon"></i>
+			</button>`;
 	}
 
 	// Render Home step
